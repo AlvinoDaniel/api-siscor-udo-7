@@ -33,10 +33,10 @@ class DepartamentoRequest extends FormRequest
                 "required",
                 Rule::unique('departamentos')->ignore($this->route('id'))
             ],
-            'siglas'                => [
-                "required",
-                Rule::unique('departamentos')->ignore($this->route('id'))
-            ],
+            // 'siglas'                => [
+            //     "required",
+            //     Rule::unique('departamentos')->ignore($this->route('id'))
+            // ],
             'cod_nucleo'            => "required|exists:nucleo,codigo_concatenado",
             'correo'                => "nullable|email",
             'correlativo'           => "nullable|numeric",
