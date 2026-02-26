@@ -38,11 +38,11 @@ class Departamento extends Model
     protected $with = ['jefe', 'nucleo'];
 
     public function dptoSuperior() {
-        return $this->belongsTo(self::class, 'id_departamento_superior');
+        return $this->belongsTo(self::class, 'id_departamento_superior', 'codigo');
     }
 
     public function subDepartamentos() {
-        return $this->hasMany(self::class, 'id_departamento_superior');
+        return $this->hasMany(self::class, 'id_departamento_superior', 'codigo');
     }
 
     public function documentos() {
@@ -109,7 +109,7 @@ class Departamento extends Model
     }
 
     public function getCanAssignAttribute(){
-        return self::where('id_departamento_superior', $this->id)->get()->count() > 0;
+        return self::where('id_departamento_superior', $this->codigo)->get()->count() > 0;
     }
 
     public function documentosExternosEnviados(){
