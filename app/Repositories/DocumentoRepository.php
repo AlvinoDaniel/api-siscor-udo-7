@@ -8,6 +8,11 @@ use App\Models\Anexo;
 use App\Models\Documento;
 use Illuminate\Support\Arr;
 use App\Models\Departamento;
+use App\Models\DocumentoAsignado;
+use App\Models\DocumentoExterno;
+use App\Models\DocumentoRepuestaExterno;
+use App\Models\DocumentoRespuesta;
+use App\Models\DocumentoRespuestaExterno;
 use Illuminate\Support\Facades\DB;
 use App\Models\DocumentosTemporal;
 use Illuminate\Support\Facades\Auth;
@@ -38,22 +43,17 @@ class DocumentoRepository {
      * Crear Documento
      */
     public function crearDocumento($data, $destino, $dataCopias){
-        $ultimo_registro = Documento::select('nro_documento')->where('estatus','enviado')->orderBy('id')->get()->last();
-        if($ultimo_registro){
-            $id_nuevo = str_pad($ultimo_registro->nro_documento + 1, 4, '0', STR_PAD_LEFT);
-        }
-        else {
-            $id_nuevo = str_pad('0', 4, '0', STR_PAD_LEFT);
-        }
-
-
-        $data['user_id'] = Auth::user()->id;
-
-        $data['nro_documento'] = $id_nuevo;
-
-
         try {
+            $data['user_id'] = Auth::user()->id;
+
             DB::beginTransaction();
+
+            $dptoUser = Departamento::find($data['departamento_id']);
+            $dptoUser->update([
+                "correlativo" => Auth::user()->personal->departamento->incrementingCorrelativo()
+            ]);
+            $dptoUser->refresh();
+            $data['nro_documento'] = $dptoUser->getCorrelativo();
             $documento = Documento::create($data);
 
             foreach ($destino as $dpto_destino) {
@@ -80,7 +80,7 @@ class DocumentoRepository {
             return $documento;
         } catch (\Throwable $th) {
             DB::rollBack();
-            throw new Exception('Hubo un error al intentar Enviar el documento.');
+            throw new Exception('Hubo un error al intentar Enviar el documento.'.$th->getMessage());
             //
         }
     }
@@ -165,13 +165,13 @@ class DocumentoRepository {
             }
 
             if($data['estatus'] === Documento::ESTATUS_ENVIADO){
-                $ultimo_registro = Documento::select('nro_documento')->where('estatus','enviado')->where('id','<>', $id)->orderBy('id')->get()->last();
-                if($ultimo_registro){
-                    $id_nuevo = str_pad($ultimo_registro->nro_documento + 1, 4, '0', STR_PAD_LEFT);
-                }
-                else {
-                    $id_nuevo = str_pad('0', 4, '0', STR_PAD_LEFT);
-                }
+
+                $dptoUser = Departamento::find($data['departamento_id']);
+                $dptoUser->update([
+                    "correlativo" => Auth::user()->personal->departamento->incrementingCorrelativo()
+                ]);
+                $dptoUser->refresh();
+                $id_nuevo = $dptoUser->getCorrelativo();
 
                 if($dataTemporal['departamentos_destino'] === 'all') {
                     $propietario = Auth::user()->personal->departamento_id;
@@ -277,6 +277,27 @@ class DocumentoRepository {
         }
     }
     /**
+     * Cambiar el estatus de Leido del documento asignado
+     * @param Integer $id
+     */
+    public function leidoDocumentoAsignado($id){
+        try {
+            $asignado = DocumentoAsignado::where('documento_id',$id)->where('departamento_id', Auth::user()->personal->departamento_id)->first();
+            $documento = Documento::find($id);
+            if(!$asignado) {
+                throw new Exception('El documento con id '.$id.' no existe.',422);
+            }
+            if($asignado->leido === 0){
+                $asignado->update(['leido' => true, 'fecha_leido' =>  Carbon::now()]);
+                $documento->fill([
+                    "estado"    => Documento::ESTADO_EN_PROCESO
+                ])->save();
+            }
+        } catch (\Throwable $th) {
+        throw new Exception($th->getMessage(), $th->getCode());
+        }
+    }
+    /**
      * Cambiar el estatus de Leido del documento
      * @param Integer $id
      */
@@ -320,5 +341,159 @@ class DocumentoRepository {
         }
     }
 
+    public function obtenerDestinatario($document){
+        $action = [
+            "circular"  => $document->enviados,
+            "oficio"    => $document->enviados[0],
+        ];
+
+        return $action[$document->tipo_documento] ?? [];
+    }
+
+    public function registrarRepuesta($data){
+        try {
+            DB::beginTransaction();
+                if(!is_null($data['id_asignado'])){
+                    $respuesta = DocumentoAsignado::find($data['id_asignado']);
+                    if(!$respuesta) throw new Exception("No existe el documento asignado para dar respuesta.");
+
+                    $respuesta->fill([
+                        "aprobado"                  => $data['aprobado'],
+                        "id_documento_respuesta"    => $data['doc'],
+                    ])->save();
+
+                    if($data['aprobado'] === '1'){
+                        $documento = Documento::find($respuesta->documento_id);
+                        $documento->fill([
+                            "estado" => Documento::ESTADO_PROCESDO
+                        ])->save();
+                    }
+
+                } else {
+                    $dataRespuestaInt = [
+                        "id_documento"          => $data['doc'],
+                        "documento_respuesta"   => $data['doc_respuesta'],
+                        "aprobado"              => $data['aprobado'],
+                    ];
+                    if($data['aprobado'] === '1'){
+                        $dataRespuestaInt['fecha_respuesta'] = Carbon::now();
+                    }
+
+                    $respuesta = DocumentoRespuesta::updateOrCreate([
+                        "id"  => $data['id_respuesta']
+                    ],$dataRespuestaInt);
+                }
+
+            DB::commit();
+            return $respuesta;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw new Exception($th->getMessage());
+            // throw new Exception($th->getMessage());
+        }
+    }
+
+    public function registrarRepuestaExterno($data, $dataResponse, $id_documento = null){
+        try {
+            DB::beginTransaction();
+                $data['user_id'] = Auth::user()->id;
+                if($data['estatus'] === Documento::ESTATUS_ENVIADO){
+                    $dptoUser = Departamento::find($data['departamento_id']);
+                    $dptoUser->update([
+                        "correlativo" => Auth::user()->personal->departamento->incrementingCorrelativo()
+                    ]);
+                    $dptoUser->refresh();
+                    $data['nro_documento'] = $dptoUser->getCorrelativo();
+                    $data['fecha_enviado'] = Carbon::now();
+                }
+                $documento = Documento::updateOrCreate([
+                    "id"  => $id_documento
+                ],$data);
+
+                $dataRespuestaExt = [
+                    "id_documento_externo"  => $dataResponse['doc_externo'],
+                    "id_documento"          => $documento->id,
+                    "aprobado"              => $dataResponse['aprobado'],
+                ];
+
+                if($dataResponse['aprobado'] === '1'){
+                    $docExterno = DocumentoExterno::find($dataResponse['doc_externo']);
+                    $docExterno->update([
+                        "estatus"   => DocumentoExterno::ESTATUS_TRAMITADO
+                    ]);
+                }
+
+                $respuesta = DocumentoRepuestaExterno::updateOrCreate([
+                    "id"  => $dataResponse['id_respuesta']
+                ],$dataRespuestaExt);
+
+            DB::commit();
+            return $documento;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw new Exception($th->getMessage());
+            // throw new Exception($th->getMessage());
+        }
+    }
+
+    public function asignarDocumento($request){
+        try {
+            $documento  = Documento::find($request->documento);
+
+            $asignado = $documento->asignadoA()->create([
+                "departamento_id"   => $request->departamento,
+                "fecha_asignado"   => Carbon::now(),
+            ]);
+            $documento->update([
+                "estado"  => Documento::ESTADO_ASIGNADO
+            ]);
+            return $asignado;
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    public function registrarRepuestaAsignado($data, $dataResponse, $id_documento = null){
+        try {
+            DB::beginTransaction();
+                $data['user_id'] = Auth::user()->id;
+                if($data['estatus'] === Documento::ESTATUS_ENVIADO){
+                    $dptoUser = Departamento::find($data['departamento_id']);
+                    $dptoUser->update([
+                        "correlativo" => Auth::user()->personal->departamento->incrementingCorrelativo()
+                    ]);
+                    $dptoUser->refresh();
+                    $data['nro_documento'] = $dptoUser->getCorrelativo();
+                    $data['fecha_enviado'] = Carbon::now();
+                }
+                $documento = Documento::updateOrCreate([
+                    "id"  => $id_documento
+                ],$data);
+
+                $dataRespuestaExt = [
+                    "id_documento_externo"  => $dataResponse['doc_externo'],
+                    "id_documento"          => $documento->id,
+                    "aprobado"              => $dataResponse['aprobado'],
+                ];
+
+                if($dataResponse['aprobado'] === '1'){
+                    $docExterno = DocumentoExterno::find($dataResponse['doc_externo']);
+                    $docExterno->update([
+                        "estatus"   => DocumentoExterno::ESTATUS_TRAMITADO
+                    ]);
+                }
+
+                $respuesta = DocumentoRepuestaExterno::updateOrCreate([
+                    "id"  => $dataResponse['id_respuesta']
+                ],$dataRespuestaExt);
+
+            DB::commit();
+            return $documento;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw new Exception($th->getMessage());
+            // throw new Exception($th->getMessage());
+        }
+    }
 
 }

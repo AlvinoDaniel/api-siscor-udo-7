@@ -28,7 +28,7 @@ class Personal extends Model
         'cod_nucleo',
         'firma',
         'departamento_id',
-        'grado_instruccion',
+        'nivel_id',
     ];
 
     protected $appends = ['firma_base_url'];
@@ -41,7 +41,7 @@ class Personal extends Model
 
     public function nivel()
     {
-        return $this->hasOne(Nivel::class, 'id', 'grado_instruccion');
+        return $this->hasOne(Nivel::class, 'id', 'nivel_id');
     }
 
     public function departamento() {

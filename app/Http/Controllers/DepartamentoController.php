@@ -37,6 +37,17 @@ class DepartamentoController extends AppBaseController
         }
     }
 
+    public function list()
+    {
+        try {
+            $departamentos = Departamento::with(['dptoSuperior'])->orderBy('cod_nucleo', 'asc')->get();
+            $message = 'Lista de Departamentos';
+            return $this->sendResponse(['departamentos' => $departamentos], $message);
+        } catch (\Throwable $th) {
+            return $this->sendError($th->getMessage());
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -57,7 +68,7 @@ class DepartamentoController extends AppBaseController
                 'Departamento Registrado exitosamente.'
             );
         } catch (\Throwable $th) {
-            return $this->sendError('Hubo un error al intentar Registrar el Departamento');
+            return $this->sendError($th->getMessage());
         }
     }
 
@@ -83,6 +94,9 @@ class DepartamentoController extends AppBaseController
     {
 
         $data = $request->except('permiso_secretaria');
+        if($request->has('correlativo')){
+            $data['correlativo'] = $request->correlativo;
+        }
         // $config_dpto = array();
         // $config_dpto['permiso_enviar_secretaria'] = empty($request->permiso_secretaria) ? 0 : $request->permiso_secretaria;
         // $data['configuracion'] = json_encode($config_dpto);
@@ -118,7 +132,7 @@ class DepartamentoController extends AppBaseController
             return $this->sendError(
                 $th->getCode() > 0
                     ? $th->getMessage()
-                    : 'Hubo un error al intentar Actualizar el Departamento'
+                    : 'Hubo un error al intentar Eliminar el Departamento'
             );
         }
     }
@@ -156,5 +170,33 @@ class DepartamentoController extends AppBaseController
             return $this->sendError($th->getMessage());
         }
     }
+
+    public function departamentsWrite()
+    {
+        try {
+            $departamentos = $this->repository->departamentsForWritre();
+            $externos = $this->repository->externalForWritre();
+            $message = 'Lista de Departamentos';
+            return $this->sendResponse([
+                    'departamentos' => $departamentos,
+                    'externos' => $externos,
+                ],
+                $message);
+        } catch (\Throwable $th) {
+            return $this->sendError($th->getMessage());
+        }
+    }
+
+    public function subDepartaments()
+    {
+        try {
+            $departamentos = $this->repository->subDepartaments();
+            $message = 'Lista de Sub Departamentos';
+            return $this->sendResponse(['departamentos' => $departamentos], $message);
+        } catch (\Throwable $th) {
+            return $this->sendError($th->getMessage());
+        }
+    }
+
 
 }

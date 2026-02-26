@@ -57,6 +57,8 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
 
  public function registrarUsuario($data){
 
+    $roles = $data['rol'];
+    $hasRolJefe = in_array('jefe', $roles);
     $personalData = [
         'nombres_apellidos'     => $data['nombres_apellidos'],
         'cedula_identidad'      => $data['cedula_identidad'],
@@ -64,8 +66,8 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
         'correo'                => $data['email'],
         'cod_nucleo'            => $data['nucleo'],
         'departamento_id'       => $data['departamento_id'],
-        'grado_instruccion'     => $data['grado_instruccion'],
-        'jefe'                  => $data['rol'] === 'jefe' ? 1 : 0,
+        'nivel_id'              => $data['grado_instruccion'],
+        'jefe'                  => $hasRolJefe ? 1 : 0,
     ];
 
     $userData = [
@@ -75,8 +77,6 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
         'status'                => 1,
     ];
 
-    $roles = $data['rol'];
-    $hasRolJefe = in_array('jefe', $roles);
 
     if($hasRolJefe){
         $firma = $data['firma'];
@@ -110,6 +110,8 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
  public function actualizarUsuario($data, $id){
     $user = User::find($id);
     $personal = Personal::find($user->personal_id);
+    $roles = $data['rol'];
+    $hasRolJefe = in_array('jefe', $roles);
 
     $personalData = [
         'nombres_apellidos'     => $data['nombres_apellidos'],
@@ -118,8 +120,8 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
         'correo'                => $data['email'],
         'cod_nucleo'            => $data['nucleo'],
         'departamento_id'       => $data['departamento_id'],
-        'grado_instruccion'     => $data['grado_instruccion'],
-        'jefe'                  => $data['rol'] === 'jefe' ? 1 : 0,
+        'nivel_id'              => $data['grado_instruccion'],
+        'jefe'                  => $hasRolJefe ? 1 : 0,
         'descripcion_cargo'     => $data['cargo_jefe']
     ];
 
@@ -129,8 +131,6 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
         'password'              => $data['password'],
     ];
 
-    $roles = $data['rol'];
-    $hasRolJefe = in_array('jefe', $roles);
     if($hasRolJefe && !$user->hasRole('jefe')){
         $hasJefe = $this->verificarJefatura($data['departamento_id']);
         if(!$hasJefe){

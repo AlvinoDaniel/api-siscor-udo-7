@@ -23,13 +23,17 @@ class BandejaPorCorregirCollection extends ResourceCollection
             return [
                 'id'              => $item->id,
                 'asunto'          => $item->asunto,
+                'contenido'       => $item->contenido,
                 'tipo_documento'  => $item->tipo_documento,
                 'estatus'         => $item->estatus,
                 'leido'           => $item->temporal->leido,
                 'fecha_creado'    => $item->created_at,
                 'anexos'          => count($item->anexos),
                 'enviados'        => Departamento::whereIn('id', $dptoDestino)->get(),
-                'dpto_copias'     => $item->temporal->tieneCopia === 1 ? Departamento::whereIn('id', $dptoCopias)->get() : []
+                'dpto_copias'     => $item->temporal->tieneCopia === 1 ? Departamento::whereIn('id', $dptoCopias)->get() : [],
+                'respuesta'       => $item->respuesta,
+                'es_respuesta'    => $item->esRespuesta,
+                'respuesta_asignado'       => $item->esRespuestaAsignado,
             ];
         });
     }

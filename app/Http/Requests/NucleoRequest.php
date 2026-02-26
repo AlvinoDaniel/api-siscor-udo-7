@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class DocumentoRequest extends FormRequest
+class NucleoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,16 +25,14 @@ class DocumentoRequest extends FormRequest
     public function rules()
     {
         return [
-            // 'asunto'                => "required",
-            'contenido'             => "required",
-            'tipo_documento'        => "required",
-            'departamentos_destino' => "nullable|string",
-            'departamentos_copias'  => "nullable|string",
-            'copias'                => "required|boolean",
-            'estatus'                => [
+            'codigo'    => [
+                'required', 'min:2','max:2',
+                Rule::unique('nucleo', 'codigo_concatenado')->ignore($this->route('id'))],
+            'nombre'    => [
                 "required",
-                Rule::in(['enviar', 'borrador', 'corregir', 'enviar_all'])
+                Rule::unique('nucleo')->ignore($this->route('id'))
             ],
+            'direccion' => 'required'
         ];
     }
 }

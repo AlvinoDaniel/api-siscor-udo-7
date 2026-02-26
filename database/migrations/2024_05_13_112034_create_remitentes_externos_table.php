@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateNucleoTable extends Migration
+class CreateRemitentesExternosTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,12 @@ class CreateNucleoTable extends Migration
      */
     public function up()
     {
-        Schema::create('nucleo', function (Blueprint $table) {
+        Schema::create('remitentes_externos', function (Blueprint $table) {
             $table->id();
-            $table->string('codigo_1',1);
-            $table->string('codigo_2',1);
-            $table->string('codigo_concatenado',2);
-            $table->string('nombre');
-            $table->string('direccion', 500);
+            $table->string('nombre_legal');
+            $table->string('documento_identidad');
+            $table->string('correo')->nullable();
+            $table->string('telefono_contacto')->nullable();
             $table->timestamps();
         });
     }
@@ -31,6 +30,6 @@ class CreateNucleoTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('nucleo');
+        Schema::dropIfExists('remitentes_externos');
     }
 }

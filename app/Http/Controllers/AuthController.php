@@ -9,17 +9,19 @@ use App\Http\Controllers\AppBaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-use App\Http\Resources\UserAuthCollection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
+// use App\Http\Resources\UserAuthCollection;
+// use Illuminate\Support\Facades\DB;
+// use Illuminate\Support\Facades\Validator;
+// use Illuminate\Support\Collection;
+// use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\ResetPasswordRequest;
+use Illuminate\Support\Facades\Crypt;
 
 class AuthController extends AppBaseController
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'sendResetPasswordEmail']]);
     }
 
 
@@ -34,9 +36,12 @@ class AuthController extends AppBaseController
      * @responseFile  responses/AuthController/login.post.json
      *
     */
-   public function login(LoginRequest $request){
+   public function login(LoginRequest $request, $conexion){
       $tipo_accion =  'Login';
-
+      $allowedConection = ['a','c'];
+      if (!in_array($conexion, $allowedConection)) {
+         return $this->sendError('Consulta no válida.');
+      }
       try {
          $user = User::where('email', $request->username_email)
                   ->orWhere('usuario', $request->username_email)
@@ -48,6 +53,15 @@ class AuthController extends AppBaseController
          if (!Hash::check($request->password, $user->password)) {
             return $this->sendError('Las credenciales no concuerdan. Email o Contraseña inválida',);
          }
+
+         if($conexion === 'a' && !$user->hasRole('administrador')){
+            return $this->sendError('El usuario no tiene los permisos para acceder a la Administracíon del Sistema.',);
+         }
+
+         if($conexion === 'c' && !$user->hasAnyRole(['jefe', 'secretaria'])){
+            return $this->sendError('El usuario no tiene los permisos para acceder al Sistema.',);
+         }
+
 
          $token = $user->createToken('TokenCultorApi-'.$user->name)->plainTextToken;
          $message = 'Usuario Autenticado exitosamente.';
@@ -85,6 +99,7 @@ class AuthController extends AppBaseController
       $rolesCollection = collect($user->roles);
       $pluckedRoles = $rolesCollection->pluck('name');
       // $user = Auth::user()->personal->departamento_id;
+      $user->personal->departamento->load(['dptoSuperior', 'subDepartamentos']);
       $data = [
         'id'                => $user->id,
         'fullName'          => $user->personal->nombres_apellidos,
@@ -152,5 +167,27 @@ class AuthController extends AppBaseController
       } else {
          return $this->sendError('La contraseña actual no coincide con nuestros registros.', 422);
       }
+   }
+
+   public function sendResetPasswordEmail(ResetPasswordRequest $request){
+    $user = User::with('personal')->where('email', $request->email)->first();
+    if($user->personal->cedula_identidad !== $request->identification){
+      return $this->sendError('Los datos suministrados no coinciden con ningun personal registrado.');
+    }
+    return $this->sendResponse([
+      'r' => true,
+      'ur' => base64_encode($user->id)
+   ], 'Se ha enviado el correo exitosamente.');
+
+    $reset_link_send = $user->sendPasswordResetLink();
+    if($reset_link_send){
+        return $this->sendResponse([
+         'r' => $reset_link_send,
+         'ur' => Crypt::encryptString($user->id)
+      ], 'Se ha enviado el correo exitosamente.');
+
+    }
+    return $this->sendError('Lo sentimos, hubo un error al intentar enviar el email.');
+
    }
 }

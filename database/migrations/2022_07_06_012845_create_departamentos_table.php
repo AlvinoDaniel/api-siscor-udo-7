@@ -18,7 +18,7 @@ class CreateDepartamentosTable extends Migration
             $table->string('codigo');
             $table->string('nombre');
             $table->string('siglas');
-            $table->string('correo');
+            $table->string('correo')->nullable();
             $table->string('cod_nucleo', 2);
             $table->timestamps();
         });

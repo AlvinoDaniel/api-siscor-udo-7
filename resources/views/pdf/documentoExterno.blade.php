@@ -125,6 +125,7 @@
 
             .page-date {
                 margin-bottom: 20px;
+                margin-top: 40px;
                 text-align: right;
             }
 
@@ -181,10 +182,7 @@
                 padding-right: 40px;
                 margin: 0 auto;
                 padding-top: 10px;
-                border-color: black;
-                border-style: solid;
-                width: 40%;
-                border-width: 1px 0 0 0;
+                text-align: center;
             }
 
 .title-header {
@@ -210,70 +208,32 @@
     <div id="pageDocument" class="page page-shadow">
       <div class="page-content">
         <div>
-          <div class="page-header">
-            <img src="{{ storage_path('app/public/Logo_UDO.png') }}" width="70" height="68">
-            <span>UNIVERSIDAD DE ORIENTE</span>
-            <span>{{$dptoPropietario}}</span>
-            <span>{{$nucleo}}</span>
-          </div>
-          <div class="page-date">
-            <span class="font-bold">{{$dptoSiglas}} N° 001-2023</span>
-            <span>Cumaná, {{$fechaEnviado}}</span>
-          </div>
-            @if($isCircular)
-                <div class="page-header title-header">
-                    <span>CIRCULAR</span>
-                </div>
-                <div class="page-addressee">
-                <p>
-                    <span style="display: inline;">Para:</span>
-                    <span style="display: inline;" class="font-bold font-uppercase"> {{$destino}} </span>
-                </p>
-                <p>
-                    <span style="display: inline;">De: </span>
-                    <span style="display: inline;" class="font-bold font-uppercase">{{$dptoPropietario}} </span>
-                </p>
-                </div>
-            @endIf
+            <div class="page-date">
+                <span class="font-bold">{{$numero_oficio}}</span>
+                <span>Cumaná, {{$fechaOficio}}</span>
+            </div>
+            <div class="page-header title-header">
+                <span>OFICIO</span>
+            </div>
 
-            @if($isOficio)
             <div class="page-addressee">
 
-              <span>Ciudadano(a):</span>
-              @if($isExternal)
-                <span class="font-bold">{{$remitente->nombre_legal}}</span>
-                <span class="font-bold">{{$remitente->documento_identidad}}</span>
-              @else
+                <span>Ciudadano(a):</span>
                 <span class="font-bold">{{$destino->nombres_apellidos}}</span>
                 <span class="font-bold">{{$destino->descripcion_cargo}}</span>
-              @endif
-              <span>Su Despacho.- </span>
+                <span>Su Despacho.- </span>
             </div>
-            @endIf
+
 
           <div class="page-body"> {!! $contenido !!} </div>
           <div class="page-sincerely">
-            <span style="margin-bottom:5px; margin-bottom:15px">Atentamente,</span>
-              <img
-                src="{{$baseUrlFirma}}"
-                width="200"
-                style="margin-bottom:5px"
-              >
+            <span>Atentamente,</span>
             <span class="page-user-signature">
-                {{$propietarioJefe}}
+                {{$remitente}}
             </span>
-            <span>{{$propietarioCargo}}</span>
+            <span>{{$documentoRemitente}}</span>
           </div>
         </div>
-         @if($hasCopias)
-          <div class="page-copys">
-            <span class="font-uppercase font-medium">CC: {{$dptoCopias}}</span>
-          </div>
-          @endIf
-      </div>
-      <div class="page-footer">
-        <span class="font-bold">DEL PUEBLO VENIMOS / HACIA EL PUEBLO VAMOS</span>
-        <span style="font-size:10px">{{$nucleoDireccion}}</span>
       </div>
     </div>
   </div>

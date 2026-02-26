@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDocumentosExternosTable extends Migration
+class DocumentosRespuestasExternosTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,13 @@ class CreateDocumentosExternosTable extends Migration
      */
     public function up()
     {
-        Schema::create('documentos_externos', function (Blueprint $table) {
+        Schema::create('documentos_respuestas_externos', function (Blueprint $table) {
             $table->id();
-            $table->string('correo_destino');
-            $table->string('persona_destino');
-            $table->string('institucion_destino');
-            $table->foreignId('documento_id')
+            $table->foreignId('id_documento_externo')
+            ->constrained('documentos_externos');
+            $table->foreignId('id_documento')
             ->constrained('documentos');
+            $table->boolean('aprobado')->default(false);
             $table->timestamps();
         });
     }
@@ -31,6 +31,6 @@ class CreateDocumentosExternosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('documentos_externos');
+        Schema::dropIfExists('documentos_externos_respuestas');
     }
 }

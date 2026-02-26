@@ -9,6 +9,10 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use App\Models\Personal;
+use App\Models\ApiPasswordReset;
+use App\Notifications\ApiResetPassword;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -53,6 +57,11 @@ class User extends Authenticatable
         return $this->belongsTo(Personal::class);
     }
 
+    public function apiReset()
+    {
+        return $this->hasOne(User::class);
+    }
+
     public function isJefe()
     {
         return $this->hasRole('jefe');
@@ -70,4 +79,20 @@ class User extends Authenticatable
         return $jefe;
     }
 
+    public function sendPasswordResetLink(){
+        $token = Str::random(6);
+        $signature = hash('md5', $token);
+
+        try {
+            // return $signature;
+            $this->notify(new ApiResetPassword($token));
+            return ApiPasswordReset::create([
+                "user_id"           => $this->id,
+                "token_signature"   => $signature,
+                "expires_at"        => Carbon::now()->addMinutes(30)
+            ]);
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+    }
 }

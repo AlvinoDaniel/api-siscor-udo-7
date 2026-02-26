@@ -16,7 +16,7 @@ class CreateDocumentosTable extends Migration
         Schema::create('documentos', function (Blueprint $table) {
             $table->id();
             $table->mediumText('asunto');
-            $table->bigInteger('nro_documento')->nullable();
+            $table->string('nro_documento', 50)->nullable();
             $table->longText('contenido');
             $table->string('tipo_documento');
             $table->string('estatus');

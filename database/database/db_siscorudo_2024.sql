@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 24-05-2023 a las 16:56:51
--- Versión del servidor: 10.4.24-MariaDB
--- Versión de PHP: 7.4.29
+-- Tiempo de generación: 15-05-2024 a las 14:17:51
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.1.25
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `db_siscor_udo_2023`
+-- Base de datos: `db_siscorudo`
 --
 
 -- --------------------------------------------------------
@@ -29,9 +29,33 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `anexos` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `nombre` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `urlAnexo` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(191) NOT NULL,
+  `urlAnexo` varchar(191) NOT NULL,
   `documento_id` bigint(20) UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `anexos`
+--
+
+INSERT INTO `anexos` (`id`, `nombre`, `urlAnexo`, `documento_id`, `created_at`, `updated_at`) VALUES
+(1, 'Detalle del Fallecido.JPG', '4/Detalle del Fallecido.JPG', 4, '2023-03-08 13:49:15', '2023-03-08 13:49:15');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `api_password_reset`
+--
+
+CREATE TABLE `api_password_reset` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `token_signature` varchar(30) NOT NULL,
+  `token_type` int(11) NOT NULL DEFAULT 10,
+  `used_type` int(11) DEFAULT NULL,
+  `expires_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -58,7 +82,7 @@ CREATE TABLE `carpertas_documentos` (
 
 CREATE TABLE `carpetas` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `nombre` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(191) NOT NULL,
   `departamento_id` bigint(20) UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -72,76 +96,78 @@ CREATE TABLE `carpetas` (
 
 CREATE TABLE `departamentos` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `codigo` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `codigo` varchar(191) NOT NULL,
   `nombre` varchar(191) NOT NULL,
-  `siglas` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `correo` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `cod_nucleo` bigint(20) UNSIGNED NOT NULL,
+  `siglas` varchar(191) NOT NULL,
+  `correo` varchar(191) NOT NULL,
+  `cod_nucleo` varchar(2) NOT NULL,
+  `correlativo` bigint(20) UNSIGNED NOT NULL DEFAULT 0,
+  `direccion` varchar(500) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `id_departamento_superior` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `departamentos`
 --
 
-INSERT INTO `departamentos` (`id`, `codigo`, `nombre`, `siglas`, `correo`, `cod_nucleo`, `created_at`, `updated_at`) VALUES
-(2, '1110001000001', 'Comisión Electoral', 'CE', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(3, '1110010000001', 'Tribunal Académico', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(4, '1111000000001', 'Rectoría ', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(5, '1111001000001', 'Dirección de Evaluación Institucional', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(6, '1111002000001', 'Dirección de Planificación', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(7, '1111003000001', 'Dirección de Planta Física', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(8, '1111004000001', 'Dirección de Relaciones Inter-Institucionales', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(9, '1111005000001', 'Dirección de Deportes', 'DGD', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(10, '1111006000001', 'Dirección de Cultura', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(11, '1111007000001', 'Dirección Museo del Mar', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(12, '1111010000001', 'Consultoría Jurídica', 'CJ', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(13, '1111020000001', 'Contraloría Interna', 'CI', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(14, '1111100000001', 'Secretaría', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(15, '1111110000001', 'Coordinación General de Control de Estudios', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(16, '1111120000001', 'Coordinación General de Publicaciones', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(17, '1111200000001', 'Vicerrectorado Académico', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(18, '1111200010001', 'Comisión de Clasificación Docente', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(19, '1111200100001', 'Dirección Instituto de Biomedicina', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(20, '1111200200001', 'Dirección de Sismología', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(21, '1111201000001', 'Coordinación General de Teleinformática', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(22, '1111202000001', 'Dirección Consejo de Investigación', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(23, '1111203000001', 'Dirección  de Curricula', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(24, '1111204000001', 'Dirección de Desarrollo Estudiantil', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(25, '1111205000001', 'Dirección de Bibliotecas', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(26, '1111206000001', 'Dirección de Tecnología', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(27, '1111207000001', 'Dirección de Form. de Recursos Humanos', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(28, '1111210000001', 'Coordinación General de Postgrados', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(29, '1111300000001', 'Vicerrectorado Administrativo', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(30, '1111300010001', 'Departamento de Comisión de Clasificación Pers. Profesional', 'CDPA', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(31, '1111301000001', 'Dirección de Organización y Sistemas Institucionales', 'DOSI', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(32, '1111302000001', 'Coordinación General de ASMOE', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(33, '1111310000001', 'Coordinación General de Administración ', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(34, '1111310001001', 'Sección de Compras', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(35, '1111310002001', 'Sección de Almacén', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(36, '1111310010001', 'Servicios Generales', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(37, '1111311000001', 'Dirección de Personal', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(38, '1111311010001', 'Departamento de Evaluación y Control', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(39, '1111311020001', 'Departamento de Servicio Social', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(40, '1111311030001', 'Departamento de Nómina', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(41, '1111311040001', 'Departamento de Organización y Estudio de Personal', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(42, '1111311050001', 'Departamento de Pasivos Laborales', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(43, '1111311060001', 'Departamento de Archivo y Estadísticas', 'AREP', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(44, '1111312000001', 'Dirección de Presupuesto', 'PRES', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(45, '1111312010001', 'Delegación de Presupuesto', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(46, '1111312011001', 'Sección de Registro y Procesamiento de Datos', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(47, '1111312012001', 'Sección de Revisión y Control', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(48, '1111312013001', 'Sección de Control de Núcleos', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(49, '1111313000001', 'Dirección de Finanzas', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(50, '1111313010001', 'Departamento de Servicios Administrativos', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(51, '1111313011001', 'Sección de Caja', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(52, '1111313012001', 'Sección de Elaboración de Cheque', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(53, '1111313013001', 'Sección de Impuestos', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(54, '1111313020001', 'Departamento de Contabilidad', '', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(55, '1111313021001', 'Sección de Registro de Bienes Muebles e Inmuebles', 'BN', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(56, '1111314000001', 'Dirección de Computación', 'DC', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(311, '1110000000001', 'Consejo Universitario', 'CU', '', 11, '0000-00-00 00:00:00', '0000-00-00 00:00:00');
+INSERT INTO `departamentos` (`id`, `codigo`, `nombre`, `siglas`, `correo`, `cod_nucleo`, `correlativo`, `direccion`, `created_at`, `updated_at`, `id_departamento_superior`) VALUES
+(2, '1110001000001', 'Comisión Electoral', 'CE', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(3, '1110010000001', 'Tribunal Académico', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(4, '1111000000001', 'Rectoría ', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(5, '1111001000001', 'Dirección de Evaluación Institucional', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(6, '1111002000001', 'Dirección de Planificación', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(7, '1111003000001', 'Dirección de Planta Física', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(8, '1111004000001', 'Dirección de Relaciones Inter-Institucionales', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(9, '1111005000001', 'Dirección de Deportes', 'DGD', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(10, '1111006000001', 'Dirección de Cultura', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(11, '1111007000001', 'Dirección Museo del Mar', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(12, '1111010000001', 'Consultoría Jurídica', 'CJ', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(13, '1111020000001', 'Contraloría Interna', 'CI', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(14, '1111100000001', 'Secretaría', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(15, '1111110000001', 'Coordinación General de Control de Estudios', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(16, '1111120000001', 'Coordinación General de Publicaciones', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(17, '1111200000001', 'Vicerrectorado Académico', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(18, '1111200010001', 'Comisión de Clasificación Docente', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(19, '1111200100001', 'Dirección Instituto de Biomedicina', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(20, '1111200200001', 'Dirección de Sismología', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(21, '1111201000001', 'Coordinación General de Teleinformática', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(22, '1111202000001', 'Dirección Consejo de Investigación', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(23, '1111203000001', 'Dirección  de Curricula', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(24, '1111204000001', 'Dirección de Desarrollo Estudiantil', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(25, '1111205000001', 'Dirección de Bibliotecas', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(26, '1111206000001', 'Dirección de Tecnología', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(27, '1111207000001', 'Dirección de Form. de Recursos Humanos', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(28, '1111210000001', 'Coordinación General de Postgrados', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(29, '1111300000001', 'Vicerrectorado Administrativo', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(30, '1111300010001', 'Departamento de Comisión de Clasificación Pers. Profesional', 'CDPA', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(31, '1111301000001', 'Dirección de Organización y Sistemas Institucionales', 'DOSI', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(32, '1111302000001', 'Coordinación General de ASMOE', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(33, '1111310000001', 'Coordinación General de Administración ', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(34, '1111310001001', 'Sección de Compras', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(35, '1111310002001', 'Sección de Almacén', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(36, '1111310010001', 'Servicios Generales', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(37, '1111311000001', 'Dirección de Personal', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(38, '1111311010001', 'Departamento de Evaluación y Control', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(39, '1111311020001', 'Departamento de Servicio Social', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(40, '1111311030001', 'Departamento de Nómina', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(41, '1111311040001', 'Departamento de Organización y Estudio de Personal', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(42, '1111311050001', 'Departamento de Pasivos Laborales', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(43, '1111311060001', 'Departamento de Archivo y Estadísticas', 'AREP', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(44, '1111312000001', 'Dirección de Presupuesto', 'PRES', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(45, '1111312010001', 'Delegación de Presupuesto', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(46, '1111312011001', 'Sección de Registro y Procesamiento de Datos', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(47, '1111312012001', 'Sección de Revisión y Control', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(48, '1111312013001', 'Sección de Control de Núcleos', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(49, '1111313000001', 'Dirección de Finanzas', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(50, '1111313010001', 'Departamento de Servicios Administrativos', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(51, '1111313011001', 'Sección de Caja', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(52, '1111313012001', 'Sección de Elaboración de Cheque', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(53, '1111313013001', 'Sección de Impuestos', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(54, '1111313020001', 'Departamento de Contabilidad', '', '', '11', 0, NULL, '0000-00-00 00:00:00', '2024-05-14 14:47:33', 56),
+(56, '1111314000001', 'Dirección de Computación', 'DC', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0),
+(310, '1110000000001', 'Consejo Universitario', 'CU', '', '11', 0, NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 0);
 
 -- --------------------------------------------------------
 
@@ -151,25 +177,53 @@ INSERT INTO `departamentos` (`id`, `codigo`, `nombre`, `siglas`, `correo`, `cod_
 
 CREATE TABLE `documentos` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `asunto` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nro_documento` bigint(20) DEFAULT NULL,
-  `contenido` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tipo_documento` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `estatus` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `asunto` mediumtext NOT NULL,
+  `nro_documento` varchar(50) DEFAULT NULL,
+  `contenido` longtext NOT NULL,
+  `tipo_documento` varchar(191) NOT NULL,
+  `estatus` varchar(191) NOT NULL,
   `fecha_enviado` datetime DEFAULT NULL,
   `departamento_id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(11) DEFAULT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `estado` varchar(191) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `prioridad` varchar(191) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `documentos`
 --
 
-INSERT INTO `documentos` (`id`, `asunto`, `nro_documento`, `contenido`, `tipo_documento`, `estatus`, `fecha_enviado`, `departamento_id`, `user_id`, `created_at`, `updated_at`) VALUES
-(54, 'Correlativo', 1, '<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat magni consequatur corporis veritatis animi aspernatur rerum modi libero neque hic facilis aperiam provident, a distinctio assumenda voluptate reprehenderit ipsum e<span style=\"color:#f8f8f2;\">t.</span></p>', 'oficio', 'enviado', '2023-03-29 09:57:26', 2, 2, '2023-03-29 14:27:26', '2023-03-29 14:27:26'),
-(55, 'Correlativo Corregir', 1, '<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat magni consequatur corporis veritatis animi aspernatur rerum modi libero neque hic facilis aperiam provident, a distinctio assumenda voluptate reprehenderit ipsum e<span style=\"color:#f8f8f2;\">t.</span></p>', 'oficio', 'enviado', '2023-03-29 09:59:13', 44, 1, '2023-03-29 14:28:14', '2023-03-29 14:29:13');
+INSERT INTO `documentos` (`id`, `asunto`, `nro_documento`, `contenido`, `tipo_documento`, `estatus`, `fecha_enviado`, `departamento_id`, `user_id`, `estado`, `created_at`, `updated_at`, `prioridad`) VALUES
+(3, 'prueba', '1', '<p>En atención, a su solicitud, &nbsp;lkjkljkljk jkljkljkljkljkjjkj</p>', 'oficio', 'enviado', '2023-04-17 11:59:21', 37, 5, NULL, '2023-04-17 16:29:00', '2023-04-17 16:29:21', NULL),
+(4, 'prueba dos', '1', '<p>jkjhkjhjkhhjkhjkhhjkhj jjjhjhh jhjhjkhjhjkhj jhjkhjhjkh hjhjkhjkhjhj hjhjhjhjh jhjhjkhjkkkkh jhjhjhjh jhjhjhjhjkhj kjhjkhjkhjkhjh jhkjhjhj hjhjhjhjhjhhjk jhjhjhjkhjhjh.</p>', 'oficio', 'enviado', '2023-04-17 12:01:43', 56, 4, NULL, '2023-04-17 16:31:43', '2023-04-17 16:31:43', NULL),
+(5, 'probando en por corregir', '1', '<p>cada minuto cada hora&nbsp;</p>', 'oficio', 'enviado', '2024-05-07 21:26:06', 54, 2, NULL, '2024-04-22 21:49:17', '2024-05-08 01:26:06', NULL),
+(6, 'borrador', '0', '<p>sdsadfsfsfseff</p>', 'oficio', 'borrador', NULL, 54, 2, NULL, '2024-04-22 22:17:20', '2024-04-22 22:17:20', NULL),
+(7, 'dff', '0001-2024', '<p>dfdfdf</p>', 'oficio', 'enviado', '2024-05-14 10:47:33', 54, 2, NULL, '2024-05-14 14:47:33', '2024-05-14 14:47:33', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `documentos_asignados`
+--
+
+CREATE TABLE `documentos_asignados` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `documento_type` varchar(191) NOT NULL,
+  `documento_id` bigint(20) UNSIGNED NOT NULL,
+  `departamento_id` bigint(20) UNSIGNED NOT NULL,
+  `leido` tinyint(1) NOT NULL DEFAULT 0,
+  `fecha_leido` date DEFAULT NULL,
+  `fecha_asignado` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `documentos_asignados`
+--
+
+INSERT INTO `documentos_asignados` (`id`, `documento_type`, `documento_id`, `departamento_id`, `leido`, `fecha_leido`, `fecha_asignado`) VALUES
+(1, 'App\\Models\\Documento', 3, 37, 0, NULL, '0000-00-00');
 
 -- --------------------------------------------------------
 
@@ -193,8 +247,11 @@ CREATE TABLE `documentos_departamentos` (
 --
 
 INSERT INTO `documentos_departamentos` (`id`, `documento_id`, `departamento_id`, `leido`, `copia`, `fecha_leido`, `created_at`, `updated_at`) VALUES
-(184, 54, 3, 0, 0, NULL, '2023-03-29 14:27:26', '2023-03-29 14:27:26'),
-(185, 55, 17, 0, 0, NULL, '2023-03-29 14:29:13', '2023-03-29 14:29:13');
+(4, 3, 56, 1, 0, '2024-05-14', '2023-04-17 16:29:21', '2024-05-14 19:33:42'),
+(5, 4, 37, 0, 0, NULL, '2023-04-17 16:31:43', '2023-04-17 16:31:43'),
+(6, 5, 37, 0, 0, NULL, '2024-05-08 01:26:06', '2024-05-08 01:26:06'),
+(7, 5, 56, 1, 1, '2024-05-14', '2024-05-08 01:26:06', '2024-05-14 15:53:23'),
+(8, 7, 37, 0, 0, NULL, '2024-05-14 14:47:33', '2024-05-14 14:47:33');
 
 -- --------------------------------------------------------
 
@@ -204,12 +261,27 @@ INSERT INTO `documentos_departamentos` (`id`, `documento_id`, `departamento_id`,
 
 CREATE TABLE `documentos_externos` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `correo_destino` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `persona_destino` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `institucion_destino` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `documento_id` bigint(20) UNSIGNED NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `numero_oficio` varchar(191) NOT NULL,
+  `id_remitente` bigint(20) UNSIGNED NOT NULL,
+  `contenido` varchar(191) NOT NULL,
+  `estatus` varchar(191) DEFAULT NULL,
+  `fecha_oficio` date DEFAULT NULL,
+  `departamento_receptor` bigint(20) UNSIGNED NOT NULL,
+  `documento_respuesta` bigint(20) UNSIGNED NOT NULL,
+  `fecha_entrada` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `documentos_respuestas`
+--
+
+CREATE TABLE `documentos_respuestas` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `id_documento` bigint(20) UNSIGNED NOT NULL,
+  `documento_respuesta` bigint(20) UNSIGNED NOT NULL,
+  `fecha_respuesta` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -221,13 +293,20 @@ CREATE TABLE `documentos_externos` (
 CREATE TABLE `documentos_temporal` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `documento_id` bigint(20) UNSIGNED NOT NULL,
-  `departamentos_destino` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `departamentos_copias` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `departamentos_destino` varchar(191) NOT NULL,
+  `departamentos_copias` varchar(191) DEFAULT NULL,
   `tieneCopia` tinyint(1) NOT NULL DEFAULT 0,
   `leido` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `documentos_temporal`
+--
+
+INSERT INTO `documentos_temporal` (`id`, `documento_id`, `departamentos_destino`, `departamentos_copias`, `tieneCopia`, `leido`, `created_at`, `updated_at`) VALUES
+(2, 6, '37', NULL, 0, 0, '2024-04-22 22:17:20', '2024-04-22 22:17:20');
 
 -- --------------------------------------------------------
 
@@ -237,11 +316,11 @@ CREATE TABLE `documentos_temporal` (
 
 CREATE TABLE `failed_jobs` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `uuid` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `uuid` varchar(191) NOT NULL,
+  `connection` text NOT NULL,
+  `queue` text NOT NULL,
+  `payload` longtext NOT NULL,
+  `exception` longtext NOT NULL,
   `failed_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -253,8 +332,8 @@ CREATE TABLE `failed_jobs` (
 
 CREATE TABLE `grupos` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `nombre` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombre` varchar(191) NOT NULL,
+  `descripcion` varchar(191) DEFAULT NULL,
   `departamento_id` bigint(20) UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -282,7 +361,7 @@ CREATE TABLE `grupos_departamentos` (
 
 CREATE TABLE `migrations` (
   `id` int(10) UNSIGNED NOT NULL,
-  `migration` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `migration` varchar(191) NOT NULL,
   `batch` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -294,23 +373,30 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (1, '2014_10_12_100000_create_password_resets_table', 1),
 (2, '2019_08_19_000000_create_failed_jobs_table', 1),
 (3, '2019_12_14_000001_create_personal_access_tokens_table', 1),
-(4, '2022_07_06_012844_create_nucleo_table', 1),
-(5, '2022_07_06_012845_create_departamentos_table', 1),
-(6, '2022_07_06_013308_create_personal_table', 2),
-(7, '2022_07_06_013310_create_users_table', 2),
-(8, '2022_07_06_013412_create_documentos_table', 2),
-(9, '2022_07_06_013529_create_documentos_departamentos_table', 2),
-(10, '2022_07_06_013608_create_carpetas_table', 2),
-(11, '2022_07_06_013718_create_carpetas_documentos_table', 2),
-(12, '2022_07_06_013739_create_plantillas_table', 2),
-(13, '2022_07_08_133015_create_documentos_externos_table', 2),
-(14, '2022_07_08_141743_create_grupos_table', 2),
-(15, '2022_07_08_142431_create_grupos_departamentos_table', 2),
-(16, '2022_07_18_131809_create_permission_tables', 2),
-(17, '2022_09_25_234854_create_documentos_temporal_table', 2),
-(18, '2022_10_29_180500_create_personal_migracion_table', 3),
-(20, '2022_11_06_004340_create_anexos_table', 4),
-(21, '2022_07_05_143107_create_nivel_table', 5);
+(4, '2022_07_05_143107_create_nivel_table', 1),
+(5, '2022_07_06_012844_create_nucleo_table', 1),
+(6, '2022_07_06_012845_create_departamentos_table', 1),
+(7, '2022_07_06_013308_create_personal_table', 1),
+(8, '2022_07_06_013310_create_users_table', 1),
+(9, '2022_07_06_013412_create_documentos_table', 1),
+(10, '2022_07_06_013529_create_documentos_departamentos_table', 1),
+(11, '2022_07_06_013608_create_carpetas_table', 1),
+(12, '2022_07_06_013718_create_carpetas_documentos_table', 1),
+(13, '2022_07_06_013739_create_plantillas_table', 1),
+(15, '2022_07_08_141743_create_grupos_table', 1),
+(16, '2022_07_08_142431_create_grupos_departamentos_table', 1),
+(17, '2022_07_18_131809_create_permission_tables', 1),
+(18, '2022_09_25_234854_create_documentos_temporal_table', 1),
+(19, '2022_10_29_180500_create_personal_migracion_table', 1),
+(20, '2022_11_06_004340_create_anexos_table', 1),
+(21, '2023_05_02_131601_create_api_password_reset_table', 2),
+(23, '2024_04_18_204827_add_direccion_departamentos_table', 3),
+(24, '2024_05_13_094200_create_documentos_asignados_table', 4),
+(25, '2024_05_13_105242_create_documentos_respuestas_table', 4),
+(27, '2024_05_13_112034_create_remitentes_externos_table', 5),
+(28, '2024_05_13_112035_create_documentos_externos_table', 5),
+(29, '2024_05_13_144640_add_estado_prioridad_documentos_table', 5),
+(32, '2024_05_13_105654_add_correlativo_superior_departamentos_table', 6);
 
 -- --------------------------------------------------------
 
@@ -320,7 +406,7 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 
 CREATE TABLE `model_has_permissions` (
   `permission_id` bigint(20) UNSIGNED NOT NULL,
-  `model_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_type` varchar(191) NOT NULL,
   `model_id` bigint(20) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -332,7 +418,7 @@ CREATE TABLE `model_has_permissions` (
 
 CREATE TABLE `model_has_roles` (
   `role_id` bigint(20) UNSIGNED NOT NULL,
-  `model_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_type` varchar(191) NOT NULL,
   `model_id` bigint(20) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -343,16 +429,9 @@ CREATE TABLE `model_has_roles` (
 INSERT INTO `model_has_roles` (`role_id`, `model_type`, `model_id`) VALUES
 (1, 'App\\Models\\User', 1),
 (2, 'App\\Models\\User', 2),
-(2, 'App\\Models\\User', 8),
-(2, 'App\\Models\\User', 12),
-(2, 'App\\Models\\User', 14),
-(2, 'App\\Models\\User', 15),
-(3, 'App\\Models\\User', 1),
-(3, 'App\\Models\\User', 7),
-(3, 'App\\Models\\User', 9),
-(3, 'App\\Models\\User', 10),
-(3, 'App\\Models\\User', 11),
-(3, 'App\\Models\\User', 13);
+(2, 'App\\Models\\User', 4),
+(2, 'App\\Models\\User', 5),
+(3, 'App\\Models\\User', 3);
 
 -- --------------------------------------------------------
 
@@ -362,8 +441,8 @@ INSERT INTO `model_has_roles` (`role_id`, `model_type`, `model_id`) VALUES
 
 CREATE TABLE `nivel` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `descripcion` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `abreviatura` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `descripcion` varchar(191) NOT NULL,
+  `abreviatura` varchar(191) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -373,9 +452,22 @@ CREATE TABLE `nivel` (
 --
 
 INSERT INTO `nivel` (`id`, `descripcion`, `abreviatura`, `created_at`, `updated_at`) VALUES
-(1, 'Licenciado', 'Lic.', NULL, NULL),
-(2, 'Ingeniero', 'Ing.', NULL, NULL),
-(3, 'Bachiller', 'Br.', NULL, NULL);
+(16, 'BASICA', 'ba', NULL, '2024-05-10 02:56:58'),
+(17, 'MEDIA', NULL, NULL, NULL),
+(18, '1ER AÑO', NULL, NULL, NULL),
+(19, 'TÉCNICO SUPERIOR', NULL, NULL, NULL),
+(20, 'TÉCNICO MEDIO', NULL, NULL, NULL),
+(21, 'INGENIERO', NULL, NULL, NULL),
+(22, 'LICENCIADO', NULL, NULL, NULL),
+(23, 'ESPECIALISTA', NULL, NULL, NULL),
+(24, 'MAESTRÍA', NULL, NULL, NULL),
+(25, 'DOCTORADO', NULL, NULL, NULL),
+(26, 'POSTDOCTORADO', NULL, NULL, NULL),
+(27, 'ABOGADO', NULL, NULL, NULL),
+(28, 'BACHILLER EN CIENCIAS', NULL, NULL, NULL),
+(29, 'MEDICO CIRUJANO', NULL, NULL, NULL),
+(30, '3ER AÑO', NULL, NULL, NULL),
+(31, 'nuevo', 'nv', '2024-05-10 03:12:31', '2024-05-10 03:12:31');
 
 -- --------------------------------------------------------
 
@@ -385,11 +477,11 @@ INSERT INTO `nivel` (`id`, `descripcion`, `abreviatura`, `created_at`, `updated_
 
 CREATE TABLE `nucleo` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `codigo_1` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `codigo_2` varchar(1) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `codigo_concatenado` bigint(20) NOT NULL,
-  `nombre` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `direccion` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `codigo_1` varchar(1) NOT NULL,
+  `codigo_2` varchar(1) NOT NULL,
+  `codigo_concatenado` varchar(2) NOT NULL,
+  `nombre` varchar(191) NOT NULL,
+  `direccion` varchar(500) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -399,12 +491,12 @@ CREATE TABLE `nucleo` (
 --
 
 INSERT INTO `nucleo` (`id`, `codigo_1`, `codigo_2`, `codigo_concatenado`, `nombre`, `direccion`, `created_at`, `updated_at`) VALUES
-(2, '1', '1', 11, 'RECTORADO', 'Calle el Parque. Transversal con Avenida Gran Mariscal. Quinta Villa Angelitos. Cumaná – Edo. Sucre. Teléfonos 0293-4008220 / 4008221', NULL, NULL),
-(4, '2', '1', 21, 'NUCLEO DE SUCRE', 'Calle el Parque. Transversal con Avenida Gran Mariscal. Quinta Villa Angelitos. Cumaná – Edo. Sucre. Teléfonos 0293-4008220 / 4008221', NULL, NULL),
-(5, '3', '1', 31, 'NUCLEO ANZOATEGUI', '', NULL, NULL),
-(6, '4', '1', 41, 'NUCLEO DE MONAGAS', '', NULL, NULL),
-(8, '5', '1', 51, 'NUCLEO DE BOLIVAR', '', NULL, NULL),
-(11, '6', '1', 61, 'NUCLEO NUEVA ESPARTA', '', NULL, NULL);
+(1, '1', '1', '11', 'RECTORADO', '', '2023-02-22 15:13:14', '2023-02-22 15:13:14'),
+(2, '2', '1', '21', 'NUCLEO DE SUCRE', 'Sucre', '2023-02-22 15:13:14', '2023-02-22 15:13:14'),
+(3, '3', '1', '31', 'NUCLEO DE ANZOATEGUI', 'Anzoategui', '2023-02-22 15:13:14', '2023-02-22 15:13:14'),
+(4, '4', '1', '41', 'NUCLEO DE MONAGAS', 'Monagas', '2023-02-22 15:13:14', '2023-02-22 15:13:14'),
+(5, '5', '1', '51', 'NUCLEO DE BOLIVAR', 'Bolivar', '2023-02-22 15:13:14', '2023-02-22 15:13:14'),
+(6, '6', '1', '61', 'NUCLEO NUEVA ESPARTA', 'Nueva Esparta', '2023-02-22 15:13:14', '2023-02-22 15:13:14');
 
 -- --------------------------------------------------------
 
@@ -413,8 +505,8 @@ INSERT INTO `nucleo` (`id`, `codigo_1`, `codigo_2`, `codigo_concatenado`, `nombr
 --
 
 CREATE TABLE `password_resets` (
-  `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(191) NOT NULL,
+  `token` varchar(191) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -426,8 +518,8 @@ CREATE TABLE `password_resets` (
 
 CREATE TABLE `permissions` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `guard_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(191) NOT NULL,
+  `guard_name` varchar(191) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -440,16 +532,16 @@ CREATE TABLE `permissions` (
 
 CREATE TABLE `personal` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `nombres_apellidos` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `cedula_identidad` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `cargo` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombres_apellidos` varchar(191) NOT NULL,
+  `cedula_identidad` varchar(191) NOT NULL,
+  `cargo` varchar(191) NOT NULL,
   `cod_nucleo` bigint(20) UNSIGNED NOT NULL,
   `jefe` tinyint(1) NOT NULL DEFAULT 0,
-  `descripcion_cargo` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `correo` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `nivel_id` bigint(20) UNSIGNED NOT NULL,
-  `firma` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `descripcion_cargo` varchar(191) DEFAULT NULL,
+  `correo` varchar(191) DEFAULT NULL,
+  `firma` varchar(191) DEFAULT NULL,
   `departamento_id` bigint(20) UNSIGNED NOT NULL,
+  `nivel_id` bigint(20) UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -458,19 +550,12 @@ CREATE TABLE `personal` (
 -- Volcado de datos para la tabla `personal`
 --
 
-INSERT INTO `personal` (`id`, `nombres_apellidos`, `cedula_identidad`, `cargo`, `cod_nucleo`, `jefe`, `descripcion_cargo`, `correo`, `nivel_id`, `firma`, `departamento_id`, `created_at`, `updated_at`) VALUES
-(1, 'Jose Daniel Alvino', '18418501', 'Analista en Sistema', 11, 1, 'Director del Departamento de Computación', 'administrador@test.com', 1, '18418501/kisspng-facsimile-signature-seal-rubber-stamp-document-5ba32c126acf12.8656995715374203064375.png', 44, NULL, '2023-01-31 12:37:06'),
-(2, 'Pedro Tata', '22474093', 'Analista en Sistema', 11, 1, 'Director de Nómina', 'ptatanomina', 0, '2/firma-y-sello.png', 2, NULL, NULL),
-(3, 'Paulina Lobaton', '16997543', 'analista', 11, 1, 'Jefa de Presupuesto', NULL, 0, NULL, 3, NULL, NULL),
-(8, 'VALDERRAMA RODRIGUEZ YUDELCYS JOSEFINA', '18414815', 'ASEADOR', 11, 0, NULL, 'rafael5_44@hotmail.com', 1, NULL, 44, '2023-01-22 17:50:32', '2023-01-22 17:50:32'),
-(9, 'MALAVE ROMERO ORLANDO JOSE', '18418553', 'JARDINERO', 21, 1, 'Director de Contabilidad', 'ORLANDOMAlave85@gmail.com', 1, '18418553/kisspng-ulyanovsk-the-state-and-revolution-russian-revolut-signature-5ac3341a120b68.4021092315227422980739.png', 5, '2023-01-22 22:01:52', '2023-02-22 14:44:21'),
-(10, 'CORNIELES RIVAS GERMANI ALEXANDER', '11730649', 'TOPÓGRAFO', 21, 0, NULL, 'GERMANICORNIELES@HOTMAIL.COM', 0, NULL, 5, '2023-01-22 22:15:45', '2023-01-22 22:15:45'),
-(11, 'ALVAREZ CASARES JOSMAIRA DE LOS ANGELES', '15348682', 'ASISTENTES DE INFORMACIÓN Y  CONTROL ESTUDIANTIL', 21, 0, 'null', 'PRUEBA03@GMAIL.COM', 1, NULL, 187, '2023-01-23 13:54:43', '2023-01-24 02:33:06'),
-(12, 'LOPEZ LUNA EVA CAROLINA', '16037750', 'PROFESOR INSTRUCTOR', 21, 0, NULL, 'eclopezluna@gmail.com', 0, NULL, 5, '2023-01-23 14:05:17', '2023-01-23 14:05:17'),
-(13, 'CAMPOS GARCÍA JESÚS ALONZO', '19156167', 'PROFESOR', 11, 1, 'Director de Rectoria', 'alonso.campos88@gmail.com', 1, '19156167/kisspng-ulyanovsk-the-state-and-revolution-russian-revolut-signature-5ac3341a120b68.4021092315227422980739.png', 17, '2023-01-31 12:34:11', '2023-01-31 12:34:11'),
-(14, 'VIZCAINO GONZALEZ CELEIDYS DEL VALLE', '12225089', 'PROFESOR ASISTENTE', 11, 0, NULL, 'celevizca@gmail.com', 1, NULL, 17, '2023-01-31 12:35:42', '2023-01-31 12:35:42'),
-(15, 'MATA ORIANA', '17214341', 'PROFESOR', 11, 0, 'jefe', 'oriana_mata@hotmail.com', 1, '17214341/kisspng-ulyanovsk-the-state-and-revolution-russian-revolut-signature-5ac3341a120b68.4021092315227422980739.png', 26, '2023-02-13 13:44:37', '2023-02-13 14:14:09'),
-(16, 'OCHOA MARTINEZ GLADYMAR DEL VALLE', '16257491', 'PROFESOR', 21, 0, 'jefe', 'gochoad@udo.edu.ve', 1, '16257491/kisspng-ulyanovsk-the-state-and-revolution-russian-revolut-signature-5ac3341a120b68.4021092315227422980739.png', 14, '2023-02-13 14:15:50', '2023-02-13 14:15:50');
+INSERT INTO `personal` (`id`, `nombres_apellidos`, `cedula_identidad`, `cargo`, `cod_nucleo`, `jefe`, `descripcion_cargo`, `correo`, `firma`, `departamento_id`, `nivel_id`, `created_at`, `updated_at`) VALUES
+(1, 'Administrador', '123456789', 'analista', 11, 0, NULL, NULL, NULL, 56, 22, NULL, NULL),
+(2, 'ALVINO VELASQUEZ JOSE DANIEL', '18418501', 'ANALISTA PROGRAMADOR SISTEMAS', 11, 1, NULL, 'djvelasq@gmail.com', NULL, 54, 22, '2023-02-22 15:43:29', '2023-02-22 15:43:29'),
+(3, 'DE SOUSA COLON MAYRA MARGARITA', '10465109', 'SECRETARIA (O) EJECUTIVA (O)', 11, 0, NULL, 'mdesousa@udo.edu.ve', NULL, 56, 19, '2023-03-03 15:22:35', '2023-03-03 15:22:35'),
+(4, 'CASTILLO ESTACIO EDUIS JOSE', '12659389', 'JEFE DE TECNOLOGÍA DE INFORMACIÓN Y COMUNICACIÓN', 11, 1, 'Director de Computación', 'ecastillo22@gmail.com', '12659389/compu.PNG', 56, 24, '2023-03-03 15:33:21', '2023-03-03 15:42:49'),
+(5, 'MEDINA ARREDONDO NEIDYMAR DEL VALLE', '12269013', 'PROFESOR ASISTENTE', 11, 1, 'Director de Personal', 'neidymarmedina@hotmail.com', '12269013/prueba.png', 37, 25, '2023-03-03 15:39:18', '2023-03-03 15:39:18');
 
 -- --------------------------------------------------------
 
@@ -480,15 +565,24 @@ INSERT INTO `personal` (`id`, `nombres_apellidos`, `cedula_identidad`, `cargo`, 
 
 CREATE TABLE `personal_access_tokens` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `tokenable_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tokenable_type` varchar(191) NOT NULL,
   `tokenable_id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `abilities` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(191) NOT NULL,
+  `token` varchar(64) NOT NULL,
+  `abilities` text DEFAULT NULL,
   `last_used_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `personal_access_tokens`
+--
+
+INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `name`, `token`, `abilities`, `last_used_at`, `created_at`, `updated_at`) VALUES
+(19, 'App\\Models\\User', 1, 'TokenCultorApi-', '1a78af3c26ab2824c4b8856f3d9f1181c0ea2108453824bed6a026b98648163b', '[\"*\"]', '2024-05-10 03:12:31', '2024-05-10 00:56:12', '2024-05-10 03:12:31'),
+(21, 'App\\Models\\User', 5, 'TokenCultorApi-', '6c98e76fb3ea263491e6c27fc07da02dee21259f0044f5a68650bdaaf61d5c13', '[\"*\"]', '2024-05-14 19:21:35', '2024-05-14 16:19:04', '2024-05-14 19:21:35'),
+(28, 'App\\Models\\User', 2, 'TokenCultorApi-', 'bcd6a4fbf29ebbe9da49e58fac7ceaf4d25da9e6ba7fd8dfc01f14c90d2649f6', '[\"*\"]', '2024-05-14 23:33:05', '2024-05-14 23:32:38', '2024-05-14 23:33:05');
 
 -- --------------------------------------------------------
 
@@ -498,12 +592,12 @@ CREATE TABLE `personal_access_tokens` (
 
 CREATE TABLE `personal_migracion` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `nombres` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `cedula_identidad` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `cargo` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `cod_nucleo` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `correo` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `grado_instruccion` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombres` varchar(191) NOT NULL,
+  `cedula_identidad` varchar(191) NOT NULL,
+  `cargo` varchar(191) NOT NULL,
+  `cod_nucleo` varchar(2) NOT NULL,
+  `correo` varchar(191) DEFAULT NULL,
+  `grado_instruccion` varchar(191) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -5361,9 +5455,25 @@ INSERT INTO `personal_migracion` (`id`, `nombres`, `cedula_identidad`, `cargo`, 
 
 CREATE TABLE `plantillas` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `asunto` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `contenido` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `asunto` mediumtext NOT NULL,
+  `contenido` longtext NOT NULL,
   `departamento_id` bigint(20) UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `remitentes_externos`
+--
+
+CREATE TABLE `remitentes_externos` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `nombre_legal` varchar(191) NOT NULL,
+  `documento_identidad` varchar(191) NOT NULL,
+  `correo` varchar(191) DEFAULT NULL,
+  `telefono_contacto` varchar(191) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -5376,8 +5486,8 @@ CREATE TABLE `plantillas` (
 
 CREATE TABLE `roles` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `guard_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(191) NOT NULL,
+  `guard_name` varchar(191) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -5387,9 +5497,9 @@ CREATE TABLE `roles` (
 --
 
 INSERT INTO `roles` (`id`, `name`, `guard_name`, `created_at`, `updated_at`) VALUES
-(1, 'administrador', 'api', '2022-10-29 21:32:39', '2022-10-29 21:32:39'),
-(2, 'jefe', 'api', '2022-10-29 21:32:39', '2022-10-29 21:32:39'),
-(3, 'secretaria', 'api', '2022-10-29 21:32:39', '2022-10-29 21:32:39');
+(1, 'administrador', 'api', '2023-02-15 16:23:54', '2023-02-15 16:23:54'),
+(2, 'jefe', 'api', '2023-02-15 16:23:54', '2023-02-15 16:23:54'),
+(3, 'secretaria', 'api', '2023-02-15 16:23:54', '2023-02-15 16:23:54');
 
 -- --------------------------------------------------------
 
@@ -5410,12 +5520,12 @@ CREATE TABLE `role_has_permissions` (
 
 CREATE TABLE `users` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `usuario` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `usuario` varchar(191) NOT NULL,
+  `email` varchar(191) NOT NULL,
+  `password` varchar(191) NOT NULL,
   `status` tinyint(1) NOT NULL,
   `personal_id` bigint(20) UNSIGNED NOT NULL,
-  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remember_token` varchar(100) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -5425,17 +5535,11 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `usuario`, `email`, `password`, `status`, `personal_id`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'admin', 'administrador@test.com', '$2y$10$7uGFLbe6Ns36K6..YVOYmOio/9bZoJO4J6zd6AThW/CGbRMIouUde', 1, 1, NULL, '2022-10-29 21:32:40', '2023-01-31 12:52:14'),
-(2, 'ptata', 'ptata@test.com', '$2y$10$TgunH.UfHSgvXHVLh7bQs.tJej4SL89zWCzecougMdfPKDIofgMkm', 1, 2, NULL, '2022-10-29 21:32:40', '2022-10-29 21:32:40'),
-(7, 'yudelcys', 'rafael5_44@hotmail.com', '$2y$10$5ASiC..1Ex3W0CEdrYNSRuGy6dSHlHRSyF68ESQBEscKhLdUnRnJ2', 1, 8, NULL, '2023-01-22 17:50:32', '2023-01-22 17:50:32'),
-(8, 'orlandoJ', 'ORLANDOMAlave85@gmail.com', '$2y$10$OcVcSLDO2313f2DlKWrMP.EJ3QNG1FKT3Xk0eJmVfQeWSbhlSDYbG', 1, 9, NULL, '2023-01-22 22:01:52', '2023-01-22 22:01:52'),
-(9, 'rivas', 'GERMANICORNIELES@HOTMAIL.COM', '$2y$10$Js0gGKJh3C85cZulMcMoIOY8afRpgqA8VMRsKumFfxWlk4wi22GPe', 1, 10, NULL, '2023-01-22 22:15:45', '2023-01-22 22:15:45'),
-(10, 'josmaira', 'PRUEBA03@GMAIL.COM', '$2y$10$CJRaXVu63IbldDSa/KFLJOk.LnCbMlATopkoGoOagj5su8HYaeJVu', 1, 11, NULL, '2023-01-23 13:54:43', '2023-01-24 02:33:06'),
-(11, 'luna', 'eclopezluna@gmail.com', '$2y$10$cU53lgs2uo0N3ahQqY.vhekxFnYMDEMjWR7GfLIpT2isA/snjid8G', 1, 12, NULL, '2023-01-23 14:05:18', '2023-01-23 14:05:18'),
-(12, 'alonsoc', 'alonso.campos88@gmail.com', '$2y$10$2Z1KoVeXG90pHTVOzN80w.r6vVbxqkvE7EZfHJ4cZrNVidRD6Oxea', 1, 13, NULL, '2023-01-31 12:34:12', '2023-01-31 12:34:12'),
-(13, 'celevizca', 'celevizca@gmail.com', '$2y$10$9CKCUYGDPqcjdOJMHhPJ3OYVhB61CYNtB2uGYvPQ6XyRooQZr2mvu', 1, 14, NULL, '2023-01-31 12:35:42', '2023-01-31 12:35:42'),
-(14, 'matao', 'oriana_mata@hotmail.com', '$2y$10$WX.wiye2bjnpNr56eAisHOCMQpbPLFpiK47dPzHO1zlsN/SEzADUy', 1, 15, NULL, '2023-02-13 13:44:37', '2023-02-13 13:44:37'),
-(15, 'ochoa', 'gochoad@udo.edu.ve', '$2y$10$ToO6gBJUhvdKllgCaSQ0dOB1jgoIiZuy5G5yooA0SGnCIrdfc2UIC', 1, 16, NULL, '2023-02-13 14:15:50', '2023-02-13 14:15:50');
+(1, 'admin', 'administrador@test.com', '$2y$10$ov213ejB/zfcPaZBDlEhUOJgYNOjzugZGVBhXBn0LTe/UbnHt1Lnm', 1, 1, NULL, '2023-02-15 16:23:54', '2023-02-15 16:23:54'),
+(2, 'alvinodaniel', 'djvelasq@gmail.com', '$2y$10$ov213ejB/zfcPaZBDlEhUOJgYNOjzugZGVBhXBn0LTe/UbnHt1Lnm', 1, 2, NULL, '2023-02-22 15:43:29', '2023-02-22 15:43:29'),
+(3, 'mdesousa', 'mdesousa@udo.edu.ve', '$2y$10$ov213ejB/zfcPaZBDlEhUOJgYNOjzugZGVBhXBn0LTe/UbnHt1Lnm', 1, 3, NULL, '2023-03-03 15:22:35', '2023-03-03 15:22:35'),
+(4, 'dircomputacion', 'ecastillo22@gmail.com', '$2y$10$ov213ejB/zfcPaZBDlEhUOJgYNOjzugZGVBhXBn0LTe/UbnHt1Lnm', 1, 4, NULL, '2023-03-03 15:33:21', '2023-03-29 14:13:47'),
+(5, 'neidymar', 'neidymarmedina@hotmail.com', '$2y$10$ov213ejB/zfcPaZBDlEhUOJgYNOjzugZGVBhXBn0LTe/UbnHt1Lnm', 1, 5, NULL, '2023-03-03 15:39:18', '2023-03-29 14:33:35');
 
 --
 -- Índices para tablas volcadas
@@ -5447,6 +5551,13 @@ INSERT INTO `users` (`id`, `usuario`, `email`, `password`, `status`, `personal_i
 ALTER TABLE `anexos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `anexos_documento_id_foreign` (`documento_id`);
+
+--
+-- Indices de la tabla `api_password_reset`
+--
+ALTER TABLE `api_password_reset`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `api_password_reset_user_id_foreign` (`user_id`);
 
 --
 -- Indices de la tabla `carpertas_documentos`
@@ -5467,15 +5578,23 @@ ALTER TABLE `carpetas`
 -- Indices de la tabla `departamentos`
 --
 ALTER TABLE `departamentos`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `departamentos_cod_nucleo_foreign` (`cod_nucleo`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `documentos`
 --
 ALTER TABLE `documentos`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `documentos_departamento_id_foreign` (`departamento_id`);
+  ADD KEY `documentos_departamento_id_foreign` (`departamento_id`),
+  ADD KEY `documentos_user_id_foreign` (`user_id`);
+
+--
+-- Indices de la tabla `documentos_asignados`
+--
+ALTER TABLE `documentos_asignados`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `documentos_asignados_documento_type_documento_id_index` (`documento_type`,`documento_id`),
+  ADD KEY `documentos_asignados_departamento_id_foreign` (`departamento_id`);
 
 --
 -- Indices de la tabla `documentos_departamentos`
@@ -5490,7 +5609,18 @@ ALTER TABLE `documentos_departamentos`
 --
 ALTER TABLE `documentos_externos`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `documentos_externos_documento_id_foreign` (`documento_id`);
+  ADD UNIQUE KEY `documentos_externos_numero_oficio_unique` (`numero_oficio`),
+  ADD KEY `documentos_externos_id_remitente_foreign` (`id_remitente`),
+  ADD KEY `documentos_externos_departamento_receptor_foreign` (`departamento_receptor`),
+  ADD KEY `documentos_externos_documento_respuesta_foreign` (`documento_respuesta`);
+
+--
+-- Indices de la tabla `documentos_respuestas`
+--
+ALTER TABLE `documentos_respuestas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `documentos_respuestas_id_documento_foreign` (`id_documento`),
+  ADD KEY `documentos_respuestas_documento_respuesta_foreign` (`documento_respuesta`);
 
 --
 -- Indices de la tabla `documentos_temporal`
@@ -5571,7 +5701,8 @@ ALTER TABLE `permissions`
 --
 ALTER TABLE `personal`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `personal_departamento_id_foreign` (`departamento_id`);
+  ADD KEY `personal_departamento_id_foreign` (`departamento_id`),
+  ADD KEY `personal_nivel_id_foreign` (`nivel_id`);
 
 --
 -- Indices de la tabla `personal_access_tokens`
@@ -5593,6 +5724,12 @@ ALTER TABLE `personal_migracion`
 ALTER TABLE `plantillas`
   ADD PRIMARY KEY (`id`),
   ADD KEY `plantillas_departamento_id_foreign` (`departamento_id`);
+
+--
+-- Indices de la tabla `remitentes_externos`
+--
+ALTER TABLE `remitentes_externos`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `roles`
@@ -5625,7 +5762,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `anexos`
 --
 ALTER TABLE `anexos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `api_password_reset`
+--
+ALTER TABLE `api_password_reset`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `carpertas_documentos`
@@ -5649,13 +5792,19 @@ ALTER TABLE `departamentos`
 -- AUTO_INCREMENT de la tabla `documentos`
 --
 ALTER TABLE `documentos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT de la tabla `documentos_asignados`
+--
+ALTER TABLE `documentos_asignados`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `documentos_departamentos`
 --
 ALTER TABLE `documentos_departamentos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=186;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `documentos_externos`
@@ -5664,10 +5813,16 @@ ALTER TABLE `documentos_externos`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `documentos_respuestas`
+--
+ALTER TABLE `documentos_respuestas`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `documentos_temporal`
 --
 ALTER TABLE `documentos_temporal`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `failed_jobs`
@@ -5691,19 +5846,19 @@ ALTER TABLE `grupos_departamentos`
 -- AUTO_INCREMENT de la tabla `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT de la tabla `nivel`
 --
 ALTER TABLE `nivel`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT de la tabla `nucleo`
 --
 ALTER TABLE `nucleo`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `permissions`
@@ -5715,13 +5870,13 @@ ALTER TABLE `permissions`
 -- AUTO_INCREMENT de la tabla `personal`
 --
 ALTER TABLE `personal`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `personal_access_tokens`
 --
 ALTER TABLE `personal_access_tokens`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT de la tabla `personal_migracion`
@@ -5736,6 +5891,12 @@ ALTER TABLE `plantillas`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `remitentes_externos`
+--
+ALTER TABLE `remitentes_externos`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `roles`
 --
 ALTER TABLE `roles`
@@ -5745,7 +5906,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Restricciones para tablas volcadas
@@ -5756,6 +5917,12 @@ ALTER TABLE `users`
 --
 ALTER TABLE `anexos`
   ADD CONSTRAINT `anexos_documento_id_foreign` FOREIGN KEY (`documento_id`) REFERENCES `documentos` (`id`);
+
+--
+-- Filtros para la tabla `api_password_reset`
+--
+ALTER TABLE `api_password_reset`
+  ADD CONSTRAINT `api_password_reset_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Filtros para la tabla `carpertas_documentos`
@@ -5774,13 +5941,93 @@ ALTER TABLE `carpetas`
 -- Filtros para la tabla `documentos`
 --
 ALTER TABLE `documentos`
-  ADD CONSTRAINT `documentos_departamento_id_foreign` FOREIGN KEY (`departamento_id`) REFERENCES `departamentos` (`id`);
+  ADD CONSTRAINT `documentos_departamento_id_foreign` FOREIGN KEY (`departamento_id`) REFERENCES `departamentos` (`id`),
+  ADD CONSTRAINT `documentos_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Filtros para la tabla `documentos_asignados`
+--
+ALTER TABLE `documentos_asignados`
+  ADD CONSTRAINT `documentos_asignados_departamento_id_foreign` FOREIGN KEY (`departamento_id`) REFERENCES `departamentos` (`id`);
+
+--
+-- Filtros para la tabla `documentos_departamentos`
+--
+ALTER TABLE `documentos_departamentos`
+  ADD CONSTRAINT `documentos_departamentos_departamento_id_foreign` FOREIGN KEY (`departamento_id`) REFERENCES `departamentos` (`id`),
+  ADD CONSTRAINT `documentos_departamentos_documento_id_foreign` FOREIGN KEY (`documento_id`) REFERENCES `documentos` (`id`);
 
 --
 -- Filtros para la tabla `documentos_externos`
 --
 ALTER TABLE `documentos_externos`
-  ADD CONSTRAINT `documentos_externos_documento_id_foreign` FOREIGN KEY (`documento_id`) REFERENCES `documentos` (`id`);
+  ADD CONSTRAINT `documentos_externos_departamento_receptor_foreign` FOREIGN KEY (`departamento_receptor`) REFERENCES `departamentos` (`id`),
+  ADD CONSTRAINT `documentos_externos_documento_respuesta_foreign` FOREIGN KEY (`documento_respuesta`) REFERENCES `documentos` (`id`),
+  ADD CONSTRAINT `documentos_externos_id_remitente_foreign` FOREIGN KEY (`id_remitente`) REFERENCES `remitentes_externos` (`id`);
+
+--
+-- Filtros para la tabla `documentos_respuestas`
+--
+ALTER TABLE `documentos_respuestas`
+  ADD CONSTRAINT `documentos_respuestas_documento_respuesta_foreign` FOREIGN KEY (`documento_respuesta`) REFERENCES `documentos` (`id`),
+  ADD CONSTRAINT `documentos_respuestas_id_documento_foreign` FOREIGN KEY (`id_documento`) REFERENCES `documentos` (`id`);
+
+--
+-- Filtros para la tabla `documentos_temporal`
+--
+ALTER TABLE `documentos_temporal`
+  ADD CONSTRAINT `documentos_temporal_documento_id_foreign` FOREIGN KEY (`documento_id`) REFERENCES `documentos` (`id`);
+
+--
+-- Filtros para la tabla `grupos`
+--
+ALTER TABLE `grupos`
+  ADD CONSTRAINT `grupos_departamento_id_foreign` FOREIGN KEY (`departamento_id`) REFERENCES `departamentos` (`id`);
+
+--
+-- Filtros para la tabla `grupos_departamentos`
+--
+ALTER TABLE `grupos_departamentos`
+  ADD CONSTRAINT `grupos_departamentos_departamento_id_foreign` FOREIGN KEY (`departamento_id`) REFERENCES `departamentos` (`id`),
+  ADD CONSTRAINT `grupos_departamentos_grupo_id_foreign` FOREIGN KEY (`grupo_id`) REFERENCES `grupos` (`id`);
+
+--
+-- Filtros para la tabla `model_has_permissions`
+--
+ALTER TABLE `model_has_permissions`
+  ADD CONSTRAINT `model_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `model_has_roles`
+--
+ALTER TABLE `model_has_roles`
+  ADD CONSTRAINT `model_has_roles_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `personal`
+--
+ALTER TABLE `personal`
+  ADD CONSTRAINT `personal_departamento_id_foreign` FOREIGN KEY (`departamento_id`) REFERENCES `departamentos` (`id`),
+  ADD CONSTRAINT `personal_nivel_id_foreign` FOREIGN KEY (`nivel_id`) REFERENCES `nivel` (`id`);
+
+--
+-- Filtros para la tabla `plantillas`
+--
+ALTER TABLE `plantillas`
+  ADD CONSTRAINT `plantillas_departamento_id_foreign` FOREIGN KEY (`departamento_id`) REFERENCES `departamentos` (`id`);
+
+--
+-- Filtros para la tabla `role_has_permissions`
+--
+ALTER TABLE `role_has_permissions`
+  ADD CONSTRAINT `role_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `role_has_permissions_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `users_personal_id_foreign` FOREIGN KEY (`personal_id`) REFERENCES `personal` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

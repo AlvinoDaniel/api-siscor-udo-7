@@ -8,6 +8,7 @@ use App\Models\Anexo;
 use App\Models\Documento;
 use Illuminate\Http\Request;
 use App\Traits\DepartamentoTrait;
+use App\Traits\DocumentoPdfTrait;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\AnexoRequest;
 use Illuminate\Support\Facades\Auth;
@@ -16,12 +17,13 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\DocumentoRequest;
 use App\Repositories\DocumentoRepository;
 use App\Http\Controllers\AppBaseController;
-
+use App\Http\Requests\AsignarDocumentoRequest;
 use Exception;
 
 class DocumentoController extends AppBaseController
 {
     use DepartamentoTrait;
+    use DocumentoPdfTrait;
 
     private $repository;
 
@@ -70,6 +72,17 @@ class DocumentoController extends AppBaseController
             'departamentos' => $departamentos_copias
         ];
         try {
+            if($request->respuesta === 'true' && $request->tipo_respuesta === Documento::TIPO_RESPUESTA_EXTERNO){
+                $documento = $this->repository->registrarRepuestaExterno($data, [
+                    "id_respuesta"  => $request->id_respuesta,
+                    "doc_externo"   => $request->doc_respuesta,
+                    "aprobado"      => $request->aprobado,
+                ]);
+                return $this->sendResponse(
+                    $documento,
+                    'Documento guardado exitosamente'
+                );
+            }
             $this->validarDepartamentos($departamentos_destino);
             if($request->copias){
                 $this->validarDepartamentos($departamentos_copias);
@@ -77,6 +90,16 @@ class DocumentoController extends AppBaseController
             $documento = $this->repository->crearDocumento($data, $departamentos_destino, $dataCopia);
             if($request->hasFile('anexos')) {
                 $this->repository->attachAnexos($request->file('anexos'), $documento->id);
+            }
+            if($request->respuesta === 'true'){
+                $dataResponse = [
+                    "id_respuesta"  => $request->id_respuesta,
+                    "id_asignado"   => $request->id_asignado,
+                    "doc"           => $documento->id,
+                    "doc_respuesta" => $request->doc_respuesta,
+                    "aprobado"      => $request->aprobado,
+                ];
+                $respuesta =  $this->repository->registrarRepuesta($dataResponse);
             }
             return $this->sendResponse(
                 $documento,
@@ -112,6 +135,20 @@ class DocumentoController extends AppBaseController
             'tieneCopia'            => $hasCopia,
         ];
         try {
+            if($request->respuesta === 'true' && $request->tipo_respuesta === Documento::TIPO_RESPUESTA_EXTERNO){
+                $data['estatus'] = Documento::ESTATUS_POR_APROBAR;
+                $documento = $this->repository->registrarRepuestaExterno($data, [
+                    "id_respuesta"  => $request->id_respuesta,
+                    "doc_externo"   => $request->doc_respuesta,
+                    "aprobado"      => $request->aprobado,
+                ]);
+                return $this->sendResponse(
+                    $documento,
+                    'Respuesta guardado exitosamente'
+                );
+            }
+
+
             $this->validarDepartamentos($departamentos_destino);
             if($request->copias){
                 $this->validarDepartamentos($departamentos_copias);
@@ -119,6 +156,16 @@ class DocumentoController extends AppBaseController
             $documento = $this->repository->crearTemporalDocumento($data, $dataTemporal);
             if($request->hasFile('anexos')) {
                 $this->repository->attachAnexos($request->file('anexos'), $documento->id);
+            }
+            if($request->respuesta === 'true'){
+                $dataResponse = [
+                    "id_respuesta"  => $request->id_respuesta,
+                    "id_asignado"   => $request->id_asignado,
+                    "doc"           => $documento->id,
+                    "doc_respuesta" => $request->doc_respuesta,
+                    "aprobado"      => $request->aprobado,
+                ];
+                $respuesta =  $this->repository->registrarRepuesta($dataResponse);
             }
             return $this->sendResponse(
                 $documento,
@@ -141,10 +188,13 @@ class DocumentoController extends AppBaseController
         if (isset($request->estatus)) {
             switch ($request->estatus) {
                 case 'temporal':
-                    $relaciones = ['temporal'];
+                    $relaciones = ['temporal', 'esRespuesta', 'esRespuestaAsignado'];
                     break;
                 case 'enviado':
-                    $relaciones = ['enviados', 'dptoCopias'];
+                    $relaciones = ['enviados', 'dptoCopias', 'asignadoA.respuestaAsignado', 'respuesta.respuesta'];
+                    break;
+                case 'enviado_externo':
+                    $relaciones = ['respuestaExterno.documentoExterno.remitente'];
                     break;
 
                 default:
@@ -159,13 +209,19 @@ class DocumentoController extends AppBaseController
                 $this->repository->leidoDocumentoTemporal($id);
             }
 
-            if($documento->departamento_id !== Auth::user()->personal->departamento_id){
+            if($documento->departamento_id !== Auth::user()->personal->departamento_id && $request->asignado === 'false'){
                 $this->repository->leidoDocumento($id);
             }
 
+            if($request->asignado === 'true'){
+                $this->repository->leidoDocumentoAsignado($id);
+            }
+
+            // $documento["pdf"] = $this->genareteDocumentBase64($documento);
+
             return $this->sendResponse(
                 $documento,
-                $request->estatus
+                $request->asignado
             );
         } catch (\Throwable $th) {
             return $this->sendError(
@@ -208,6 +264,19 @@ class DocumentoController extends AppBaseController
             'tieneCopia'            => $hasCopia,
         ];
         try {
+            if($request->respuesta === 'true' && $request->tipo_respuesta === Documento::TIPO_RESPUESTA_EXTERNO){
+                $data['estatus'] = $request->estatus === 'enviar' ? $status[$request->estatus] : Documento::ESTATUS_POR_APROBAR;
+                $documento = $this->repository->registrarRepuestaExterno($data, [
+                    "id_respuesta"  => $request->id_respuesta,
+                    "doc_externo"   => $request->doc_respuesta,
+                    "aprobado"      => $request->aprobado,
+                ], $id);
+                return $this->sendResponse(
+                    $documento,
+                    'Respuesta guardado exitosamente'
+                );
+            }
+
             $this->validarDepartamentos($departamentos_destino);
             if($hasCopia){
                 $this->validarDepartamentos($departamentos_copias);
@@ -215,6 +284,16 @@ class DocumentoController extends AppBaseController
             $documento = $this->repository->updateTemporalDocumento($data, $dataTemporal, $id);
             if($request->hasFile('anexos')) {
                 $this->repository->attachAnexos($request->file('anexos'), $documento->id);
+            }
+            if($request->respuesta === 'true'){
+                $dataResponse = [
+                    "id_respuesta"  => $request->id_respuesta,
+                    "id_asignado"   => $request->id_asignado,
+                    "doc"           => $documento->id,
+                    "doc_respuesta" => $request->doc_respuesta,
+                    "aprobado"      => $request->aprobado,
+                ];
+                $respuesta =  $this->repository->registrarRepuesta($dataResponse);
             }
             $mensaje = $request->estatus === Documento::ESTATUS_ENVIADO ? 'Documento enviado exitosamente' : 'Documento guardado exitosamente';
             return $this->sendResponse(
@@ -355,6 +434,10 @@ class DocumentoController extends AppBaseController
                    array_push($copiasNombres, $value->nombre);
                 }
             }
+            if($documento->is_external){
+                $documento->load(['respuestaExterno.documentoExterno.remitente']);
+            }
+            // return $this->sendResponse($documento, '');
             $pdf = \PDF::loadView('pdf.documento', [
                 'dptoPropietario'   => $documento->propietario->nombre,
                 'dptoSiglas'        => $documento->propietario->siglas,
@@ -362,14 +445,18 @@ class DocumentoController extends AppBaseController
                 'dptoCopias'        => implode(', ',$copiasNombres),
                 'hasCopias'         => $hasCopias ,
                 'contenido'         => $documento->contenido,
+                'isExternal'        => $documento->is_external,
+                'remitente'         => $documento->is_external ? $documento->respuestaExterno->documentoExterno->remitente : null,
                 'isCircular'        => $documento->tipo_documento === 'circular',
                 'isOficio'          => $documento->tipo_documento === 'oficio',
                 'nucleo'            => $documento->propietario->nucleo->nombre ?? '',
-                'nucleoDireccion'   => $documento->propietario->nucleo->direccion ?? '',
+                'nucleoDireccion'   => $documento->propietario->direccion ?? $documento->propietario->nucleo->direccion,
                 'propietarioJefe'   => $documento->propietario->jefe->nombres_apellidos,
                 'propietarioCargo'  => $documento->propietario->jefe->descripcion_cargo,
                 'baseUrlFirma'      => $documento->propietario->jefe->baseUrlFirma,
-                'destino'           => $documento->tipo_documento === 'circular' ? $this->getNames($documento->enviados, $documento->estatus) : $documento->enviados[0]->jefe,
+                'destino'           => $documento->tipo_documento === 'circular'
+                    ? $this->getNames($documento->enviados, $documento->estatus)
+                    : $documento->enviados[0]->jefe ?? '',
 
             ]);
             return $pdf->download('Documento_Recibido.pdf');
@@ -380,6 +467,19 @@ class DocumentoController extends AppBaseController
                 //     ? $th->getMessage()
                 //     : 'Hubo un error al intentar Obtener el documento'
             );
+        }
+    }
+
+    public function assignDoc(AsignarDocumentoRequest $request){
+        try {
+            $asignado = $this->repository->asignarDocumento($request);
+            return $this->sendResponse(
+                $asignado,
+                'Documento asignado Exitosamente.'
+            );
+        } catch (\Throwable $th) {
+            // return $this->sendError('Lo sentimos, hubo un error al intentar asignar el documento.');
+            return $this->sendError($th->getMessage());
         }
     }
 

@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\NivelController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,7 +21,8 @@ Route::group([
 ], function () {
    Route::group([
       'prefix'=>'auth'],function(){
-         Route::post('login',[AuthController::class, 'login']);        
+         Route::post('login/{conexion}',[AuthController::class, 'login']);
+         Route::post('/reset-password',[AuthController::class, 'sendResetPasswordEmail']);
          Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/me', [AuthController::class, 'me'])->name('me');
             Route::get('/logout', [AuthController::class, 'logout']);
@@ -28,4 +30,19 @@ Route::group([
             Route::post('/changepassword', [AuthController::class, 'changePassword']);
          });
    });
+});
+
+Route::group([
+	'middleware'  => 'api',
+  'prefix'      => 'nivel'
+], function () {
+
+  Route::middleware(['auth:sanctum'])->group(function () {
+    Route::controller(NivelController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::post('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+    });
+  });
 });
