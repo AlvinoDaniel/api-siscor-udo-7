@@ -202,10 +202,31 @@
 .font-uppercase {
   text-transform: uppercase !important;
 }
+    #watermark {
+        position: fixed;
+        top: 40%;
+        left: 50%;
+        width: 100%;
+        text-align: center;
+        font-size: 80pt !important;
+        color: #979595;
+        /* #D3D3D3; */
+        opacity: 0.2;
+        transform: translate(-50%, -50%) rotate(-30deg);
+        z-index: 1000;
+        font-family: 'Courier New', monospace !important;
+        font-weight: bold;
+        pointer-events: none;
+        white-space: nowrap;
+        text-transform: uppercase;
+    }
         </style>
     </head>
 
     <body >
+        <div id="watermark">
+        Vista Previa
+        </div>
     <div class="page-container">
     <div id="pageDocument" class="page page-shadow">
       <div class="page-content">
@@ -217,7 +238,7 @@
             <span>{{$nucleo}}</span>
           </div>
           <div class="page-date">
-            <span class="font-bold">{{$dptoSiglas}} N° {{$nroDocumento}}</span>
+            <span class="font-bold">{{$dptoSiglas}} N° **** - {{$year}}</span>
             <span>Cumaná, {{$fechaEnviado}}</span>
           </div>
             @if($isCircular)
@@ -240,13 +261,8 @@
             <div class="page-addressee">
 
               <span>Ciudadano(a):</span>
-              @if($isExternal)
-                <span class="font-bold">{{$remitente->nombre_legal}}</span>
-                <span class="font-bold">{{$remitente->documento_identidad}}</span>
-              @else
-                <span class="font-bold">{{$destino->nombres_apellidos}}</span>
-                <span class="font-bold">{{$destino->descripcion_cargo}}</span>
-              @endif
+              <span class="font-bold">{{$destino_nombres_apellidos}}</span>
+              <span class="font-bold">{{$destino_descripcion_cargo}}</span>
               <span>Su Despacho.- </span>
             </div>
             @endIf

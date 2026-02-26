@@ -9,10 +9,12 @@ use App\Http\Controllers\AppBaseController;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Models\DocumentoExterno;
+use App\Traits\DocumentoPdfTrait;
 
 class DocumentoExternoController extends AppBaseController
 {
     private $repository;
+    use DocumentoPdfTrait;
 
     public function __construct(DocumentoExternoRepository $documentoRepository)
     {
@@ -48,6 +50,7 @@ class DocumentoExternoController extends AppBaseController
     {
         try {
             $documento = DocumentoExterno::with(['respuesta.respuesta'])->find($id);
+            $documento["pdf"] = $this->genareteDocumentExternoBase64($documento);
             return $this->sendResponse(
                 $documento,
                 'Documento Externo'

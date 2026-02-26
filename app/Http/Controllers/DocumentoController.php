@@ -217,7 +217,7 @@ class DocumentoController extends AppBaseController
                 $this->repository->leidoDocumentoAsignado($id);
             }
 
-            // $documento["pdf"] = $this->genareteDocumentBase64($documento);
+            $documento["pdf"] = $this->genareteDocumentBase64($documento);
 
             return $this->sendResponse(
                 $documento,
@@ -445,6 +445,7 @@ class DocumentoController extends AppBaseController
                 'dptoCopias'        => implode(', ',$copiasNombres),
                 'hasCopias'         => $hasCopias ,
                 'contenido'         => $documento->contenido,
+                'nroDocumento'      => $documento->nro_documento,
                 'isExternal'        => $documento->is_external,
                 'remitente'         => $documento->is_external ? $documento->respuestaExterno->documentoExterno->remitente : null,
                 'isCircular'        => $documento->tipo_documento === 'circular',
@@ -479,6 +480,20 @@ class DocumentoController extends AppBaseController
             );
         } catch (\Throwable $th) {
             // return $this->sendError('Lo sentimos, hubo un error al intentar asignar el documento.');
+            return $this->sendError($th->getMessage());
+        }
+    }
+
+    public function generatePreview(Request $request)
+    {
+        try {
+        $documento["pdf"] = $this->genaretePreviewBase64($request);
+        return $this->sendResponse(
+                $documento,
+                'VISTA PREVIA GENERADO EXITOSAMENTE'
+            );
+
+        } catch (\Throwable $th) {
             return $this->sendError($th->getMessage());
         }
     }
